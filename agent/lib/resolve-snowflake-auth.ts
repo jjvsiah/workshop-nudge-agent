@@ -3,9 +3,21 @@ import type { SnowflakeAuth } from "./snowflake";
 import { passwordConfigured, useFixtures } from "./snowflake";
 import { snowflakeAppAuth, snowflakeAuth } from "./snowflake-connect";
 
+function useAppConnectPrincipal(ctx: ToolContext): boolean {
+  const forced = process.env.SNOWFLAKE_CONNECT_PRINCIPAL?.trim().toLowerCase();
+  if (forced === "app") return true;
+  if (forced === "user") return false;
+
+  // Schedules and other unattended runs typically have no user principal.
+  // Interactive TUI / web sessions with a user keep user-scoped OAuth.
+  const principalType = ctx.session.auth.current?.principalType;
+  return principalType !== "user";
+}
+
 /**
  * Resolve Snowflake credentials for a tool call.
  * Default: Vercel Connect OAuth (`snowflake/account-intel`).
+ * Unattended/schedule runs automatically use app-scoped Connect tokens.
  * Set SNOWFLAKE_AUTH_MODE=password to use username/password env instead.
  * Set SNOWFLAKE_USE_FIXTURES=1 for demo data.
  */
@@ -23,9 +35,7 @@ export async function resolveSnowflakeAuth(
     return { mode: "password" };
   }
 
-  const principal =
-    process.env.SNOWFLAKE_CONNECT_PRINCIPAL?.trim() === "app" ? "app" : "user";
-  const provider = principal === "app" ? snowflakeAppAuth : snowflakeAuth;
+  const provider = useAppConnectPrincipal(ctx) ? snowflakeAppAuth : snowflakeAuth;
   const { token } = await ctx.getToken(provider);
   return { mode: "oauth", token };
 }
