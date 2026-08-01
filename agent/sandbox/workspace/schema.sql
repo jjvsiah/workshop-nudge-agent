@@ -1,34 +1,33 @@
--- Expected Snowflake shape for workshop-nudge-agent.
--- Point SF_*_TABLE env vars at views that match these columns if your CRM sync differs.
+-- Live source for workshop-nudge-agent (Internal Playground Snowflake):
+--   GTM.ANALYTICS.ACCOUNTS
+--
+-- Stale-account logic uses:
+--   IS_ACTIVE_ENTERPRISE_CUSTOMER = TRUE
+--   last touch = COALESCE(LAST_ACTIVITY_BY_GO_TO_MARKET_AT, LAST_ACTIVITY_ON)
+--   stale when null or >= :minDays old
+--
+-- Context notes/usage are derived from columns on the same table
+-- (AE_NOTES, BOUNTY_NOTES, PLATFORM_TYPE, VRAY_FRAMEWORKS, etc.).
+-- A dedicated workshop/events table can replace the activity proxy later.
 
-CREATE TABLE IF NOT EXISTS accounts (
-  account_id STRING,
-  account_name STRING,
-  plan STRING,                    -- hobby | pro | enterprise | enterprise_plus
-  arr_usd NUMBER,
-  primary_contact_name STRING,
-  primary_contact_email STRING,
-  owner_email STRING
-);
-
-CREATE TABLE IF NOT EXISTS account_activities (
-  account_id STRING,
-  activity_at TIMESTAMP_NTZ,
-  activity_type STRING,           -- workshop | meeting | enablement | email | call | ...
-  subject STRING,
-  description STRING
-);
-
-CREATE TABLE IF NOT EXISTS account_notes (
-  account_id STRING,
-  note_at TIMESTAMP_NTZ,
-  author STRING,
-  body STRING
-);
-
-CREATE TABLE IF NOT EXISTS account_usage_signals (
-  account_id STRING,
-  signal STRING,                  -- primary_use | ai_workload | ai_sdk | v0 | firewall | ...
-  value STRING,
-  observed_at TIMESTAMP_NTZ
-);
+-- Key columns (subset) from GTM.ANALYTICS.ACCOUNTS:
+--   SFDC_ACCOUNT_ID
+--   ACCOUNT_NAME
+--   HIGHEST_BILLING_PLAN
+--   ANNUAL_RECURRING_REVENUE
+--   ACCOUNT_LIFECYCLE_STAGE
+--   OWNER_NAME
+--   CUSTOMER_SUCCESS_MANAGER_NAME
+--   SALES_ENGINEER_NAME
+--   TECHNICAL_CONSULTANT_NAME
+--   ACCOUNT_LINK
+--   AE_NOTES
+--   LAST_ACTIVITY_ON
+--   LAST_ACTIVITY_BY_GO_TO_MARKET_AT
+--   IS_ACTIVE_ENTERPRISE_CUSTOMER
+--   IS_INTERNAL_TEST
+--   PLATFORM_TYPE
+--   CURRENT_SOFTWARE_FRAMEWORK
+--   VRAY_FRAMEWORKS
+--   AVG_BUILDS_30D
+--   SEAT_UTILIZATION

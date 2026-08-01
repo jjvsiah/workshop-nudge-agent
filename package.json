@@ -23,6 +23,7 @@
   "devDependencies": {
     "@types/node": "24.x",
     "@types/snowflake-sdk": "1.6.24",
+    "microsandbox": "^0.5.10",
     "typescript": "7.0.2"
   },
   "overrides": {

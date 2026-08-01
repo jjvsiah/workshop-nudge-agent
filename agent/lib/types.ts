@@ -10,11 +10,18 @@ export interface StaleAccount {
   accountName: string;
   plan: AccountPlan;
   arrUsd: number | null;
+  /** Proxy for last GTM touch: LAST_ACTIVITY_BY_GO_TO_MARKET_AT, else LAST_ACTIVITY_ON. */
   lastWorkshopAt: string | null;
   daysSinceWorkshop: number | null;
+  lifecycleStage: string | null;
+  ownerName: string | null;
+  csmName: string | null;
+  salesEngineerName: string | null;
   primaryContactName: string | null;
   primaryContactEmail: string | null;
-  ownerEmail: string | null;
+  accountLink: string | null;
+  geography: string | null;
+  regionName: string | null;
 }
 
 export interface AccountNote {

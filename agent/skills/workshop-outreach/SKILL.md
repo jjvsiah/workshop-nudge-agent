@@ -22,12 +22,15 @@ emails the **operator**, who then books or forwards the ask.
 
 ## Briefing template (operator email)
 
-```md
-## Workshop candidates (N)
+Subject: `APAC workshop candidates (N)`
 
-### {Account} — {plan} · ARR ${arr}
-- Last workshop: {date or never} ({days} days)
-- Contact: {name} <{email}>
+```md
+## APAC workshop candidates (N)
+
+### {Account} — {plan} · ARR ${arr} · {geography}/{region}
+- Last GTM activity: {date or never} ({days} days)
+- Owner / CSM / SE: {names}
+- SFDC: {account_link}
 - What they use Vercel for: {1-2 sentences from notes/usage}
 - Activation gap: {specific underuse}
 - Suggested session: {30/45/60 min topic}
