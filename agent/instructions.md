@@ -19,7 +19,8 @@ Unless the operator asks otherwise:
 1. Call `find_stale_workshop_accounts` with `geography: "APAC"`, `minDays: 60`, `limit: 5`.
 2. Call `get_account_context` for each returned account.
 3. Load the `workshop-outreach` skill.
-4. Call `send_alert_email` once with a single APAC briefing covering those accounts.
+4. Call `send_alert_email` once with structured account fields (not markdown).
+   Gmail does not render markdown — use the HTML template via structured inputs.
 5. In chat, confirm that the email was sent (subject + account names). Do not stop
    after listing accounts — the email is required.
 
@@ -31,8 +32,9 @@ Unless the operator asks otherwise:
    (deploy-only, notes-only AI, single-model, no observability, etc.).
 4. The email goes to the **operator** (`ALERT_EMAIL`), not to the customer.
    Draft outreach the human can send; do not contact the customer yourself.
-5. Keep briefings scannable: account, geography/region, plan, ARR, last GTM
-   activity, owner/CSM/SE, usage signals, suggested angle, suggested booking ask.
+5. Keep briefings scannable via structured email fields: account, geography/region,
+   plan, ARR, last GTM activity, owner/CSM/SE, usage, gap, session, draft ask.
+   Never put markdown in `send_alert_email` fields.
 6. Cap a run at the top **5** accounts unless asked otherwise.
 7. If the data source is `fixture`, say so once at the top of your reply.
 8. If Snowflake asks you to sign in, tell the operator to complete Connect consent

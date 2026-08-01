@@ -266,25 +266,48 @@ export async function findStaleWorkshopAccounts(options: {
   minDays: number;
   limit: number;
   geography?: string;
+  ownerNames?: string[];
   auth?: SnowflakeAuth;
 }): Promise<{ accounts: StaleAccount[]; source: SnowflakeSource }> {
   const geography = (options.geography ?? "APAC").trim().toUpperCase();
+  const ownerNames = (options.ownerNames ?? [])
+    .map((n) => n.trim())
+    .filter(Boolean);
 
   if (useFixtures() || !options.auth) {
     return {
       accounts: fixtureStaleAccounts(options.minDays)
-        .filter(
-          (a) =>
+        .filter((a) => {
+          const geoOk =
             !geography ||
             (a.geography ?? "").toUpperCase() === geography ||
-            (a.regionName ?? "").toUpperCase().includes(geography),
-        )
+            (a.regionName ?? "").toUpperCase().includes(geography);
+          const ownerOk =
+            ownerNames.length === 0 ||
+            ownerNames.some((n) =>
+              (a.ownerName ?? "").toLowerCase().includes(n.toLowerCase()),
+            );
+          return geoOk && ownerOk;
+        })
         .slice(0, options.limit),
       source: "fixture",
     };
   }
 
   const table = accountsTable();
+
+  const ownerClause =
+    ownerNames.length === 0
+      ? ""
+      : `AND (${ownerNames
+          .map(() => "LOWER(COALESCE(OWNER_NAME, '')) LIKE ?")
+          .join(" OR ")})`;
+
+  const binds: snowflake.Binds = [geography, geography];
+  for (const name of ownerNames) {
+    binds.push(`%${name.toLowerCase()}%`);
+  }
+  binds.push(options.minDays, options.limit);
 
   // Workshop/meeting proxy: last GTM activity, else any SF activity.
   // Narrow to active enterprise customers in the requested geography (default APAC).
@@ -316,6 +339,7 @@ export async function findStaleWorkshopAccounts(options: {
         UPPER(COALESCE(GEOGRAPHY, '')) = ?
         OR UPPER(COALESCE(HIERARCHY_GEOGRAPHY, '')) = ?
       )
+      ${ownerClause}
       AND (
         COALESCE(LAST_ACTIVITY_BY_GO_TO_MARKET_AT, LAST_ACTIVITY_ON::TIMESTAMP_TZ) IS NULL
         OR DATEDIFF(
@@ -330,7 +354,7 @@ export async function findStaleWorkshopAccounts(options: {
   `;
 
   const rows = await withConnection(options.auth, (conn) =>
-    execute(conn, sql, [geography, geography, options.minDays, options.limit]),
+    execute(conn, sql, binds),
   );
 
   return {

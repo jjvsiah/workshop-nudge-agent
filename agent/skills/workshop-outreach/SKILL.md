@@ -20,25 +20,30 @@ emails the **operator**, who then books or forwards the ask.
 | Large team, no enablement | Team onboarding workshop: environments, reviews, ownership |
 | High ARR, null last workshop | Executive + SE joint session; treat as activation risk |
 
-## Briefing template (operator email)
+## Email rules (Gmail)
 
-Subject: `APAC workshop candidates (N)`
+Gmail does **not** render markdown. Never pass markdown to `send_alert_email`.
+Fill the structured `accounts[]` fields with plain sentences only.
 
-```md
-## APAC workshop candidates (N)
+Call `send_alert_email` like this:
 
-### {Account} — {plan} · ARR ${arr} · {geography}/{region}
-- Last GTM activity: {date or never} ({days} days)
-- Owner / CSM / SE: {names}
-- SFDC: {account_link}
-- What they use Vercel for: {1-2 sentences from notes/usage}
-- Activation gap: {specific underuse}
-- Suggested session: {30/45/60 min topic}
-- Draft ask: "{one sentence the operator can send}"
-```
+- `subject`: `APAC workshop candidates (N)`
+- `headline`: same as subject (or shorter)
+- `intro`: one plain sentence
+- `accounts`: one object per account with:
+  - `accountName`, `plan`, `arrUsd`, `geography`, `regionName`
+  - `lastActivityAt`, `daysSinceActivity`
+  - `ownerName`, `csmName`, `salesEngineerName`, `accountLink`
+  - `usageSummary` — 1–2 plain sentences
+  - `activationGap` — specific underuse
+  - `suggestedSession` — e.g. `45-min AI SDK + Workflow workshop`
+  - `draftAsk` — one sentence the operator can send
+
+The tool renders a Gmail-safe HTML card layout + plain-text fallback.
 
 ## Tone
 
 - Specific and commercial-aware, not hype.
 - Assume the customer is successful at deploys; the gap is depth.
 - Never invent product usage; quote notes/signals.
+- No markdown characters (`#`, `*`, backticks) inside field values.
